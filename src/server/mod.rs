@@ -65,12 +65,12 @@ pub async fn init_server() -> Result<Rocket<Build>> {
     // Catchers
     let app = app.register("/", rocket::catchers![]);
 
-    // Add the Users routes
+    // Add the NFTs routes
     let app = app.mount(
         "/nfts",
         routes![
-            controllers::energy::get_nfts_for_sale,
-            controllers::energy::sell_nft,
+            controllers::energy::nfts_for_sale,
+            controllers::energy::nft_sell,
         ],
     );
 
