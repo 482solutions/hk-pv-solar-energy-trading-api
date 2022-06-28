@@ -4,7 +4,7 @@ use rocket::{
     State,
 };
 
-use crate::{models::energy::EnergyNFT, storage::FilesStorageBackend};
+use crate::{models::energy::EnergyNFT, storage::fs::FilesStorageBackend};
 
 #[get("/for_sale")]
 pub async fn nfts_for_sale(backend: &State<FilesStorageBackend>) -> (Status, Value) {

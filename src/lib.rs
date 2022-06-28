@@ -15,6 +15,9 @@ mod storage;
 /// Models
 pub mod models;
 
+/// Blockchain API connection
+pub mod blockchain;
+
 /// App related Errors
 pub mod error;
 pub type Result<T> = std::result::Result<T, error::Error>;

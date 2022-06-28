@@ -25,6 +25,10 @@ futures = "0.3.21"
 rocket = { version = "0.5.0-rc.2", features = ["json", "secrets", "tls"] }
 serde = { version = "1", features = ["derive"] }
 thiserror = "1"
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ['derive'] }
+sp-application-crypto = { version = "6.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master", features = ["full_crypto"] }
+sp-core = { version = "6.0.0", default-features = false, features = ["full_crypto"], git = "https://github.com/paritytech/substrate.git", branch = "master" }
+substrate-api-client = { version = "0.6.0", git = "https://github.com/scs/substrate-api-client.git" }
 
 [[bin]]
 name = "energy_trading_api"

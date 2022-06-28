@@ -2,7 +2,7 @@ use clap::Parser;
 use rocket::{data::Limits, Build, Config, Rocket};
 use std::path::Path;
 
-use crate::{controllers, error::Error, storage::FilesStorageBackend, Result};
+use crate::{controllers, error::Error, storage::fs::FilesStorageBackend, Result};
 
 /// Server & App Configurations
 pub mod config;
