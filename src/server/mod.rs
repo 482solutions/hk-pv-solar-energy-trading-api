@@ -57,7 +57,7 @@ pub async fn init_server() -> Result<Rocket<Build>> {
         .merge(("secret_key", (server_settings.secret_key.as_str())))
         .merge(("keep_alive", server_settings.keep_alive as u32));
 
-    let backend = FilesStorageBackend {};
+    let backend = FilesStorageBackend::new().await;
 
     // Configure the Rocket server with configured settings
     let app = rocket::custom(rocket_cfg);
