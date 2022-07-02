@@ -5,7 +5,7 @@ use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
 
 const API_URL_WSS: &str = "wss://westmint-rpc.polkadot.io:443";
 
-#[subxt::subxt(runtime_metadata_path = "artifacts/metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "artifacts/westmint_metadata.scale")]
 pub mod polkadot {}
 
 #[derive(Clone)]
