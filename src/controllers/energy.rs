@@ -1,20 +1,16 @@
-use rocket::{
-    http::Status,
-    serde::json::{Json, Value},
-    State,
-};
+use rocket::{http::Status, serde::json::Value, State};
 
-use crate::{models::energy::EnergyNFT, storage::fs::FilesStorageBackend};
+use crate::storage::fs::FilesStorageBackend;
 
 #[get("/for_sale")]
 pub async fn nfts_for_sale(backend: &State<FilesStorageBackend>) -> (Status, Value) {
     super::generic_response(backend.get_nfts_for_sale().await)
 }
 
-#[post("/sell", format = "json", data = "<nft_item>")]
+#[post("/sell", format = "json", data = "<storage_key>")]
 pub async fn nft_sell(
-    nft_item: Json<EnergyNFT>,
+    storage_key: String,
     backend: &State<FilesStorageBackend>,
 ) -> (Status, Value) {
-    super::generic_response(backend.sell_nft(nft_item.0.storage_key).await)
+    super::generic_response(backend.sell_nft(storage_key).await)
 }

@@ -115,6 +115,7 @@ impl FilesStorageBackend {
     }
 
     pub async fn sell_nft(&self, storage_key: String) -> Result<(), Error> {
-        unimplemented!();
+        println!("Item {} was sold...", storage_key);
+        Ok(())
     }
 }
