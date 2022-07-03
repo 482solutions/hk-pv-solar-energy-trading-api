@@ -16,9 +16,5 @@ pub async fn nft_sell(
     nft_item: Json<EnergyNFT>,
     backend: &State<FilesStorageBackend>,
 ) -> (Status, Value) {
-    super::generic_response(
-        backend
-            .sell_nft(nft_item.0.collection_id, nft_item.0.item_id)
-            .await,
-    )
+    super::generic_response(backend.sell_nft(nft_item.0.storage_key).await)
 }
