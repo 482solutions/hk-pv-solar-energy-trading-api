@@ -1,6 +1,8 @@
 use crate::blockchain::westmint::WestmintApi;
 use crate::error::Error;
 use crate::models::energy::{EnergyNFT, EnergyNFTDTO};
+use crate::models::westmint::PalletUniquesItemMetadata;
+use subxt::sp_core::storage::StorageKey;
 
 use serde_json;
 use std::fs;
@@ -14,7 +16,7 @@ static START: Once = Once::new();
 
 // const STORAGE_FOLDER_BASE: &str = "data";
 const STORAGE_FOLDER_FETCHED: &str = "data/fetched";
-const STORAGE_FOLDER_RPOCESSED: &str = "data/processed";
+// const STORAGE_FOLDER_RPOCESSED: &str = "data/processed";
 
 #[derive(Clone)]
 pub struct FilesStorageBackend {}
@@ -61,7 +63,7 @@ impl FilesStorageBackend {
         fs::create_dir_all(STORAGE_FOLDER_FETCHED)?;
 
         for item in storage_data_pairs {
-            let processed_data_file = format!("{}/{}", STORAGE_FOLDER_RPOCESSED, item.storage_key);
+            let processed_data_file = format!("{}/{}", STORAGE_FOLDER_FETCHED, item.storage_key);
             // Do not create data file for item if it was already processed
             if Path::new(&processed_data_file).exists() {
                 continue;
@@ -103,25 +105,75 @@ impl FilesStorageBackend {
             })
             .collect();
 
-        // Move processed files from fetched folder to processed
-        fs::create_dir_all(STORAGE_FOLDER_RPOCESSED)?;
-        for entry in fs::read_dir(STORAGE_FOLDER_FETCHED)? {
-            let entry = entry?;
-            fs::rename(
-                entry.path(),
-                format!(
-                    "{}/{}",
-                    STORAGE_FOLDER_RPOCESSED,
-                    entry.file_name().to_str().unwrap()
-                ),
-            )?;
-        }
+        // // Move processed files from fetched folder to processed
+        // fs::create_dir_all(STORAGE_FOLDER_RPOCESSED)?;
+        // for entry in fs::read_dir(STORAGE_FOLDER_FETCHED)? {
+        //     let entry = entry?;
+        //     fs::rename(
+        //         entry.path(),
+        //         format!(
+        //             "{}/{}",
+        //             STORAGE_FOLDER_RPOCESSED,
+        //             entry.file_name().to_str().unwrap()
+        //         ),
+        //     )?;
+        // }
 
         Ok(data_dto)
     }
 
-    pub async fn sell_nft(&self, storage_key: String) -> Result<(), Error> {
-        println!("Item {} was sold...", storage_key);
+    pub async fn sell_nft(&self, storage_key_str: String) -> Result<(), Error> {
+        println!("Item {} was sold...", storage_key_str);
+        let asset_hash = WestmintApi::get_uniques_assets_prefix_key().unwrap();
+        let instance_metadata_hash =
+            WestmintApi::get_uniques_instance_metadata_prefix_key().unwrap();
+        let nft_item_id_hash =
+            WestmintApi::extract_nft_item_id_from_hash(&storage_key_str).unwrap();
+        let nft_collection_id_hash =
+            WestmintApi::extract_nft_collection_id_from_hash(&storage_key_str).unwrap();
+
+        let nft_asset_key = format!(
+            "{}{}{}",
+            asset_hash, nft_collection_id_hash, nft_item_id_hash
+        );
+        let nft_metadata_key = format!(
+            "{}{}{}",
+            instance_metadata_hash, nft_collection_id_hash, nft_item_id_hash
+        );
+
+        if !storage_key_str.starts_with(&nft_metadata_key) {
+            return Err(Error::FormatError("Storage key is not valid".to_string()));
+        }
+
+        let storage_key_asset = StorageKey(hex::decode(&nft_asset_key).unwrap());
+        let storage_key_metadata = StorageKey(hex::decode(&nft_metadata_key).unwrap());
+
+        let asset_exists = WestmintApi::check_uniques_item_exists(&storage_key_asset)
+            .await
+            .unwrap();
+        let metadata_exists = WestmintApi::check_uniques_item_exists(&storage_key_metadata)
+            .await
+            .unwrap();
+
+        if !asset_exists || !metadata_exists {
+            return Err(Error::InternalError);
+        }
+
+        let metadata =
+            match WestmintApi::get_uniques_item_by_storage_key::<PalletUniquesItemMetadata>(
+                &storage_key_metadata,
+            )
+            .await
+            {
+                Ok(data) => data,
+                Err(_) => return Err(Error::InternalError),
+            };
+
+        // TODO:
+        // Destroy NFT (asset + metadata)
+        // Remove file from storage
+        // transfer tokens to owner address,
+
         Ok(())
     }
 }
