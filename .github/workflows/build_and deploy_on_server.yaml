@@ -43,7 +43,7 @@ jobs:
           port: ${{ secrets.PORT }}
           source: "./target/aarch64-unknown-linux-gnu/release/energy_trading_api"
           target: "./energy_trading_api"
-          strip_components: 3
+          strip_components: 4
       - name: Start api service
         uses: appleboy/ssh-action@master
         with:
