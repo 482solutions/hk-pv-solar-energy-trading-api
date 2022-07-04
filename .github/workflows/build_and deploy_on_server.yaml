@@ -25,7 +25,7 @@ jobs:
           use-cross: true
           command: build
           args: --target aarch64-unknown-linux-gnu --release
-      - name: Stop service
+      - name: Stop api service
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -44,7 +44,7 @@ jobs:
           source: "./target/aarch64-unknown-linux-gnu/release/energy_trading_api"
           target: "./energy_trading_api"
           strip_components: 3
-      - name: Start service
+      - name: Start api service
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
