@@ -61,6 +61,12 @@ impl FilesStorageBackend {
         fs::create_dir_all(STORAGE_FOLDER_FETCHED)?;
 
         for item in storage_data_pairs {
+            let processed_data_file = format!("{}/{}", STORAGE_FOLDER_RPOCESSED, item.storage_key);
+            // Do not create data file for item if it was already processed
+            if Path::new(&processed_data_file).exists() {
+                continue;
+            }
+
             let data_file = format!("{}/{}", STORAGE_FOLDER_FETCHED, item.storage_key);
             let mut file = fs::OpenOptions::new()
                 .create(true)
