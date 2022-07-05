@@ -19,3 +19,8 @@ pub struct EnergyNFTDTO {
     pub(crate) storage_key: String,
     pub(crate) metadata: EnergyNFTMetadata,
 }
+
+#[derive(Clone, Serialize, Deserialize, Debug, Default)]
+pub struct EnergyNFTSellDTO {
+    pub(crate) storage_key: String,
+}

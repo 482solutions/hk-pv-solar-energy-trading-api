@@ -12,7 +12,7 @@ cargo build --release
 
 ## Starting the server
 ```bash
-./target/release/rocketapi -f config.sample.yml
+./target/release/energy_trading_api -f config.sample.yml
 ```
 
 ## Available endpoints
@@ -74,15 +74,15 @@ Once endpoint get data using GET request - items from `fetched` folder will be m
 
 ## Configs (Optional)
 
-The `configs` folder has configurations to start the server as a service and nginx config to server this rocketapi server in reverse proxy mode.
-- Start the rocketapi server as a service
+The `configs` folder has configurations to start the server as a service and nginx config to server this energy_trading_api server in reverse proxy mode.
+- Start the energy_trading_api server as a service
 ```text
-1) copy the configs/rocketapi.service to /etc/systemd/system folder
-2) systemctl enable rocketapi
-3) systemctl start rocketapi
+1) copy the configs/energy_trading_api.service to /etc/systemd/system folder
+2) systemctl enable energy_trading_api
+3) systemctl start energy_trading_api
 ```
 
-- Then you can copy the `configs/nginx.vhost` to `/etc/nginx/sites-enabled` to access the rocketapi server via nginx.
+- Then you can copy the `configs/nginx.vhost` to `/etc/nginx/sites-enabled` to access the energy_trading_api server via nginx.
 
 ---
 

@@ -1,5 +1,6 @@
 use crate::models::westmint::{PalletUniquesItemDetails, PalletUniquesItemMetadata};
 use codec::Decode;
+use subxt::sp_core::storage::StorageKey;
 use subxt::storage::{StorageEntryKey, StorageKeyPrefix, StorageMapKey};
 use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
 
@@ -154,5 +155,77 @@ impl WestmintApi {
         // println!("Value data {:?}", data);
 
         Ok((hex::encode(&query_key), data))
+    }
+
+    pub async fn get_uniques_item_by_storage_key<T: Decode>(
+        storage_key: &StorageKey,
+    ) -> Result<T, Box<dyn std::error::Error>> {
+        let mut client = ClientBuilder::new();
+        client = client.set_url(API_URL_WSS);
+        let api = client.build()
+            .await
+            .unwrap()
+            .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+
+        let storage_data = api.client.rpc().storage(storage_key, None).await?.unwrap();
+        let data: T = Decode::decode(&mut &storage_data.0[..])?;
+
+        Ok(data)
+    }
+
+    pub async fn check_uniques_item_exists(
+        storage_key: &StorageKey,
+    ) -> Result<bool, Box<dyn std::error::Error>> {
+        let mut client = ClientBuilder::new();
+        client = client.set_url(API_URL_WSS);
+        let api = client.build()
+            .await
+            .unwrap()
+            .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+
+        let storage_data = api.client.rpc().storage(storage_key, None).await.unwrap();
+        match storage_data {
+            Some(_) => Ok(true),
+            None => Ok(false),
+        }
+    }
+
+    pub fn extract_nft_item_id_from_hash(storage_key: &String) -> Result<String, String> {
+        let id_length = 40;
+        let valid_storage_key_length = 144;
+
+        if storage_key.len() != valid_storage_key_length {
+            return Err("Input storage key is not valid!".to_string());
+        }
+
+        let item_id = &storage_key[storage_key.len() - id_length..];
+
+        Ok(item_id.to_string())
+    }
+
+    pub fn extract_nft_collection_id_from_hash(storage_key: &String) -> Result<String, String> {
+        let id_length = 40;
+        let valid_storage_key_length = 144;
+
+        if storage_key.len() != valid_storage_key_length {
+            return Err("Input storage key is not valid!".to_string());
+        }
+
+        let collection_id =
+            &storage_key[storage_key.len() - 2 * id_length..storage_key.len() - id_length];
+
+        Ok(collection_id.to_string())
+    }
+
+    pub fn get_uniques_assets_prefix_key() -> Result<String, String> {
+        let prefix = StorageKeyPrefix::new::<polkadot::uniques::storage::Asset>();
+        let string_hash = hex::encode(&prefix.to_storage_key());
+        Ok(string_hash)
+    }
+
+    pub fn get_uniques_instance_metadata_prefix_key() -> Result<String, String> {
+        let prefix = StorageKeyPrefix::new::<polkadot::uniques::storage::InstanceMetadataOf>();
+        let hash = hex::encode(&prefix.to_storage_key());
+        Ok(hash)
     }
 }
