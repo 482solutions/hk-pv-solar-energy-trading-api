@@ -1,10 +1,12 @@
 use crate::models::westmint::{PalletUniquesItemDetails, PalletUniquesItemMetadata};
 use codec::Decode;
-use subxt::sp_core::storage::StorageKey;
+use std::str::FromStr;
+use subxt::sp_core::{sr25519, storage::StorageKey, Pair};
 use subxt::storage::{StorageEntryKey, StorageKeyPrefix, StorageMapKey};
-use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+use subxt::{ClientBuilder, DefaultConfig, PairSigner, PolkadotExtrinsicParams};
 
-const API_URL_WSS: &str = "wss://westmint-rpc.polkadot.io:443";
+const API_URL_WESTMINT_WSS: &str = "wss://westmint-rpc.polkadot.io:443";
+const API_URL_WESTEND_WSS: &str = "wss://westend-rpc.polkadot.io:443";
 
 #[subxt::subxt(runtime_metadata_path = "artifacts/westmint_metadata.scale")]
 pub mod polkadot {}
@@ -17,7 +19,7 @@ impl WestmintApi {
         collection_id: u32,
     ) -> Result<Vec<PalletUniquesItemDetails>, Box<dyn std::error::Error>> {
         let mut client = ClientBuilder::new();
-        client = client.set_url(API_URL_WSS);
+        client = client.set_url(API_URL_WESTMINT_WSS);
         let api = client.build()
             .await
             .unwrap()
@@ -61,7 +63,7 @@ impl WestmintApi {
         item_id: u32,
     ) -> Result<PalletUniquesItemDetails, Box<dyn std::error::Error>> {
         let mut client = ClientBuilder::new();
-        client = client.set_url(API_URL_WSS);
+        client = client.set_url(API_URL_WESTMINT_WSS);
         let api = client.build()
             .await
             .unwrap()
@@ -89,7 +91,7 @@ impl WestmintApi {
         collection_id: u32,
     ) -> Result<Vec<(String, PalletUniquesItemMetadata)>, Box<dyn std::error::Error>> {
         let mut client = ClientBuilder::new();
-        client = client.set_url(API_URL_WSS);
+        client = client.set_url(API_URL_WESTMINT_WSS);
         let api = client.build()
             .await
             .unwrap()
@@ -133,7 +135,7 @@ impl WestmintApi {
         item_id: u32,
     ) -> Result<(String, PalletUniquesItemMetadata), Box<dyn std::error::Error>> {
         let mut client = ClientBuilder::new();
-        client = client.set_url(API_URL_WSS);
+        client = client.set_url(API_URL_WESTMINT_WSS);
         let api = client.build()
             .await
             .unwrap()
@@ -161,7 +163,7 @@ impl WestmintApi {
         storage_key: &StorageKey,
     ) -> Result<T, Box<dyn std::error::Error>> {
         let mut client = ClientBuilder::new();
-        client = client.set_url(API_URL_WSS);
+        client = client.set_url(API_URL_WESTMINT_WSS);
         let api = client.build()
             .await
             .unwrap()
@@ -177,7 +179,7 @@ impl WestmintApi {
         storage_key: &StorageKey,
     ) -> Result<bool, Box<dyn std::error::Error>> {
         let mut client = ClientBuilder::new();
-        client = client.set_url(API_URL_WSS);
+        client = client.set_url(API_URL_WESTMINT_WSS);
         let api = client.build()
             .await
             .unwrap()
@@ -188,6 +190,50 @@ impl WestmintApi {
             Some(_) => Ok(true),
             None => Ok(false),
         }
+    }
+
+    pub async fn destroy_nft_item(
+        _storage_key_asset: StorageKey,
+        _storage_key_metadata: StorageKey,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        // TODO : implement it
+        Ok(())
+    }
+
+    pub async fn transfer_tokens(
+        receiver_addr: &str,
+        amount: u32,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let mut client = ClientBuilder::new();
+        client = client.set_url(API_URL_WESTEND_WSS);
+        let api = client.build()
+            .await
+            .unwrap()
+            .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+
+        let signer_pair = sr25519::Pair::from_string_with_seed(
+            "tray toast boost hospital blur butter vast glide upset crunch dial video",
+            None,
+        )
+        .unwrap();
+        let signer = PairSigner::new(signer_pair.0);
+        let dest = subxt::sp_core::crypto::AccountId32::from_str(receiver_addr)
+            .unwrap()
+            .into();
+
+        // TODO : we need to transfer PVSE, not WND, but for now there is some problems with Westmint networks and
+        // tranasctions cannot be signed. I suppouse it will work on other networks and respective parachains (Statemine, Statemint, ...)
+
+        // 10^12 - 1 WND
+        // For testing I am using 10^6
+        let amount_internal = 10_u128.pow(10) * amount as u128;
+        println!("internal amount : {amount_internal}");
+        let extrinsic = api.tx().balances().transfer(dest, amount_internal)?;
+        // Sign and submit the extrinsic, returning its hash.
+        let tx_hash = extrinsic.sign_and_submit_default(&signer).await?;
+        println!("Transfered {} WND to {receiver_addr} address, transaction hash : {tx_hash}", ((amount as f32) * 0.01));
+
+        Ok(())
     }
 
     pub fn extract_nft_item_id_from_hash(storage_key: &String) -> Result<String, String> {
