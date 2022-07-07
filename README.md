@@ -12,7 +12,7 @@ cargo build --release
 
 ## Starting the server
 ```bash
-./target/release/energy_trading_api -f config.sample.yml
+./target/release/energy_trading_api --config config.sample.yml
 ```
 
 ## Available endpoints
