@@ -36,7 +36,7 @@ impl FilesStorageBackend {
 
     #[tokio::main]
     pub async fn start_data_loading() {
-        let interval = time::Duration::from_secs(600);
+        let interval = time::Duration::from_secs(10); // each 10 secs for now
         loop {
             match FilesStorageBackend::load_nft_data().await {
                 Ok(_) => {}
