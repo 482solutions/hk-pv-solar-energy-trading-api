@@ -1,4 +1,4 @@
-API REST Server for PV solar energy NFTs access (part of trading system) using Rocket.rs
+API REST Server for energy NFTs (ID 482) access (part of trading system) using Rocket.rs
 --------------------------------
 
 ---
