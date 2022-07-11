@@ -2,6 +2,19 @@ API REST Server for energy NFTs (ID 482) access (part of trading system) using R
 --------------------------------
 
 ---
+## Table of Contents
+
+- [Table of Contents](#table-of-contents)
+- [Compile](#compile)
+- [Starting the server](#starting-the-server)
+- [Available endpoints](#available-endpoints)
+- [GET Response for `get NFTs for sale`](#get-response-for-get-nfts-for-sale)
+- [POST Request for `notify NFT sell`](#post-request-for-notify-nft-sell)
+- [Data storage](#data-storage)
+- [Configs (Optional)](#configs-optional)
+- [Contribution](#contribution)
+
+---
 ## Compile
 
 ```bash
